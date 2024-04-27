@@ -5,22 +5,22 @@ from flask_cors import CORS
 import psycopg2
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
-# Flask app
+
 app = Flask(__name__)
 cors = CORS(app, origins='http://localhost:5173')
 
-# Initialize spaCy English language model
+# Initialize spaCy English language model. Due to low memory in production i use small model
 nlp = spacy.load("en_core_web_sm")
-print("nlp downld")
+
 
 
 
 # Function to preprocess text using spaCy
 def preprocess_text(text):
-    doc = nlp(text.lower())  # Lowercase text
+    doc = nlp(text.lower())  
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]  # Remove stop words and punctuation
     # Join the tokens with a space to form a string
     preprocessed_text = ' '.join(tokens)
@@ -34,7 +34,7 @@ def find_most_similar_question(user_question, database_questions):
     # Preprocess the user question
     user_question_processed = preprocess_text(user_question)
 
-    # Initialize variables for tracking the best match
+    # variables for tracking the best match
     best_match_score = 0
     best_match_question = None
 
@@ -57,10 +57,6 @@ def find_most_similar_question(user_question, database_questions):
     if best_match_score < 0.5:
         return None, None
 
-    # Retrieve the answer from the database for the best match (using the question itself)
-    # cursor = connection.cursor() 
-    # cursor.execute("SELECT answer FROM questions_answer WHERE question = %s", (best_match_question,))
-    # answer = cursor.fetchone()[0]
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT answer FROM questions_answer WHERE question = %s", (best_match_question,))
@@ -114,20 +110,14 @@ def answer_question():
         data = request.get_json()
         question = data.get("question")
         if question:
-            # Connect to database
+            # Connecting to the database
             connection, database_questions = get_db_connection()
-            cursor = connection.cursor()  # Define the cursor variable
 
             try:
-                # Fetch all questions from the database
-                # cursor.execute("SELECT question FROM questions_answer")
-                # database_questions = [row[0] for row in cursor.fetchall()]
-
-                # Find the most similar question and answer using NLP
+                # Finding the most similar answer
                 answer, similarity = find_most_similar_question(question, database_questions)
 
                 if answer:
-                    # Return the answer and optionally the similarity score
                     return jsonify({"answer": answer, "similarity": similarity})
                 else:
                     return jsonify({"answer": "Your question is not relatable to our service."})
