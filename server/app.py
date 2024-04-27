@@ -141,6 +141,6 @@ def answer_question():
 
 
 
-@app.route("/")
+@app.get("/")
 def index():
-    return "<p>Server Running...</p>"
+    return jsonify({"msg": "home occurred."})
