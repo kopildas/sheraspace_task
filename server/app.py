@@ -139,3 +139,8 @@ def answer_question():
     else:
         return jsonify({"error": "Unsupported Media Type. Please use JSON."}), 415
 
+
+
+@app.route("/")
+def index():
+    return "<p>Server Running...</p>"
