@@ -62,6 +62,7 @@ def find_most_similar_question(user_question, database_questions):
     # cursor.execute("SELECT answer FROM questions_answer WHERE question = %s", (best_match_question,))
     # answer = cursor.fetchone()[0]
     try:
+        cursor = connection.cursor()
         cursor.execute("SELECT answer FROM questions_answer WHERE question = %s", (best_match_question,))
         answer = cursor.fetchone()[0]
         # connection.commit()
