@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-cors = CORS(app, origins='http://localhost:5173')
+url = os.getenv("CORS_ORIGIN")
+cors = CORS(app, origins=url)
 
-# Initialize spaCy English language model
+# Initialize spaCy English language model, due to low memory in production I used smallest model
 nlp = spacy.load("en_core_web_sm")
 
 
@@ -42,7 +43,7 @@ def find_most_similar_question(user_question):
             best_match_score = similarity
             best_match_question = question
 
-    if best_match_score < 0.5:
+    if best_match_score < 0.7:
         return None, None
 
     cursor = connection.cursor()
