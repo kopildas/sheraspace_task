@@ -13,7 +13,7 @@ app = Flask(__name__)
 cors = CORS(app, origins='http://localhost:5173')
 
 # Initialize spaCy English language model
-nlp = spacy.load("en_core_web_lg")
+nlp = spacy.load("en_core_web_sm")
 print("nlp downld")
 
 
