@@ -130,7 +130,7 @@ def answer_question():
                     # Return the answer and optionally the similarity score
                     return jsonify({"answer": answer, "similarity": similarity})
                 else:
-                    return jsonify({"error": "Your question is not relatable to our service."}), 404
+                    return jsonify({"answer": "Your question is not relatable to our service."})
 
             except Exception as e:
                 print(f"Error accessing database: {e}")
