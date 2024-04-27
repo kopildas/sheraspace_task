@@ -25,7 +25,8 @@ def find_most_similar_question(user_question):
     user_question_processed = preprocess_text(user_question)
     best_match_score = 0
     best_match_question = None
-    connection,database_questions = get_db_connection()
+
+    connection, database_questions = get_db_connection()
 
     for question in database_questions:
         question_processed = preprocess_text(question)
@@ -70,7 +71,7 @@ def get_db_connection():
         except Exception as e:
             print(f"Error connecting to database: {e}")
             exit(1)
-    return connection,database_questions
+    return connection, database_questions
 
 @app.post("/api/answer")
 def answer_question():
@@ -79,6 +80,7 @@ def answer_question():
         question = data.get("question")
         if question:
             try:
+                connection, database_questions = get_db_connection()
                 answer, similarity = find_most_similar_question(question)
                 if answer:
                     return jsonify({"answer": answer, "similarity": similarity})
