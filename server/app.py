@@ -13,12 +13,16 @@ cors = CORS(app, origins='http://localhost:5173')
 # Initialize spaCy English language model
 nlp = spacy.load("en_core_web_sm")
 
+
+
 # Function to preprocess text using spaCy
 def preprocess_text(text):
     doc = nlp(text.lower())
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
     preprocessed_text = ' '.join(tokens)
     return preprocessed_text
+
+
 
 # Function to find the closest matching answer using NLP
 def find_most_similar_question(user_question):
@@ -49,29 +53,24 @@ def find_most_similar_question(user_question):
 
     return answer, best_match_score
 
-# Database connection object (initially None)
-connection = None
-database_questions = None
+
 
 # Database connection function
 def get_db_connection():
-    global connection
-    global database_questions
+    try:
+        db_url = os.getenv("DATABASE_URL")
+        connection = psycopg2.connect(db_url)
 
-    if connection is None or database_questions is None:
-        try:
-            db_url = os.getenv("DATABASE_URL")
-            connection = psycopg2.connect(db_url)
-
-            if database_questions is None:
-                cursor = connection.cursor()
-                cursor.execute("SELECT question FROM questions_answer")
-                database_questions = [row[0] for row in cursor.fetchall()]
-                cursor.close()
-        except Exception as e:
-            print(f"Error connecting to database: {e}")
-            exit(1)
+        cursor = connection.cursor()
+        cursor.execute("SELECT question FROM questions_answer")
+        database_questions = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        exit(1)
     return connection, database_questions
+
+
 
 @app.post("/api/answer")
 def answer_question():
@@ -80,7 +79,7 @@ def answer_question():
         question = data.get("question")
         if question:
             try:
-                connection, database_questions = get_db_connection()
+                # connection, database_questions = get_db_connection()
                 answer, similarity = find_most_similar_question(question)
                 if answer:
                     return jsonify({"answer": answer, "similarity": similarity})
@@ -93,6 +92,9 @@ def answer_question():
             return jsonify({"error": "Missing required field 'question'"}), 400
     else:
         return jsonify({"error": "Unsupported Media Type. Please use JSON."}), 415
+
+
+
 
 @app.get("/")
 def index():
